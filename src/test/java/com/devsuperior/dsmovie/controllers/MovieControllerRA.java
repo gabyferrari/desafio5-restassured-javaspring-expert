@@ -10,12 +10,16 @@ import org.junit.jupiter.api.Test;
 public class MovieControllerRA {
 	
 	private String movieTitle;
+	private Long existingId, nonExistingId;
 	
 	@BeforeEach
 	private void setUp() {
 		baseURI = "http://localhost:8080";
 		
 		movieTitle = "Vingadores";
+		
+		existingId = 1L;
+		nonExistingId = 100L;
 	}
 	
 	@Test
@@ -26,7 +30,7 @@ public class MovieControllerRA {
 				.get("/movies")
 			.then()
 				.statusCode(200)
-					.body("content.title", hasItems("The Witcher", "Titanic"));
+					.body("content.title", hasItems("Harry Potter e a Pedra Filosofal", "Titanic"));
 	}
 	
 	@Test
@@ -43,11 +47,29 @@ public class MovieControllerRA {
 	}
 	
 	@Test
-	public void findByIdShouldReturnMovieWhenIdExists() {		
+	public void findByIdShouldReturnMovieWhenIdExists() {	
+		
+		given()
+			.when()
+				.get("/movies/{id}", existingId)
+			.then()
+				.statusCode(200)
+					.body("id", is(1))
+					.body("title", equalTo("The Witcher"))
+					.body("score", is(4.5F))
+					.body("count", is(2))
+					.body("image", equalTo("https://www.themoviedb.org/t/p/w533_and_h300_bestv2/jBJWaqoSCiARWtfV0GlqHrcdidd.jpg"));
 	}
 	
 	@Test
 	public void findByIdShouldReturnNotFoundWhenIdDoesNotExist() {	
+		
+		given()
+			.when()
+				.get("/movies/{id}", nonExistingId)
+			.then()
+				.statusCode(404)
+				.body("error", equalTo("Recurso não encontrado"));
 	}
 	
 	@Test
